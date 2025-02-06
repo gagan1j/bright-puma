@@ -4,10 +4,10 @@ pipeline {
     stages {
         stage('Declarative: Checkout SCM') {
             steps {
-                checkout scm
+                checkout([$class: 'GitSCM', branches: [[name: 'refs/heads/main']]])
             }
         }
-        
+
         stage('Clone Repository') {
             steps {
                 git 'https://github.com/gagan1j/bright-puma.git'
