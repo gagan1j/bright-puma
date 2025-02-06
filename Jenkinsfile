@@ -1,28 +1,27 @@
 pipeline {
     agent any
-    environment {
-        VENV_DIR = 'venv'  // Virtual Environment Directory
-    }
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/gagan1j/bright-puma.git'
+                git url: 'https://github.com/gagan1j/bright-puma.git', branch: 'main'
             }
         }
         stage('Setup Python Environment') {
             steps {
-                sh 'python3 -m venv $VENV_DIR'
-                sh 'source $VENV_DIR/bin/activate && pip install -r requirements.txt'
+                bat 'python --version' // Ensure Python is installed
+                bat 'python -m venv venv' // Create virtual env
+                bat 'call venv\\Scripts\\activate' // Activate venv
+                bat 'pip install -r requirements.txt' // Install dependencies
             }
         }
         stage('Run Unit Tests') {
             steps {
-                sh 'source $VENV_DIR/bin/activate && pytest tests/'  // Run tests (if available)
+                bat 'call venv\\Scripts\\activate && pytest' // Run tests
             }
         }
         stage('Start Flask Application') {
             steps {
-                sh 'source $VENV_DIR/bin/activate && nohup python3 app.py &'
+                bat 'start /b python app.py' // Use 'start /b' instead of nohup
             }
         }
     }
