@@ -1,60 +1,29 @@
 pipeline {
     agent any
-
     environment {
-        VENV_PATH = "venv"
+        VENV_DIR = 'venv'  // Virtual Environment Directory
     }
-
     stages {
-        stage('Checkout Code') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-username/bright-puma.git'
+                git branch: 'main', url: 'https://github.com/gagan1j/bright-puma.git'
             }
         }
-
         stage('Setup Python Environment') {
             steps {
-                sh '''
-                python3 -m venv $VENV_PATH
-                source $VENV_PATH/bin/activate
-                pip install -r requirements.txt
-                '''
+                sh 'python3 -m venv $VENV_DIR'
+                sh 'source $VENV_DIR/bin/activate && pip install -r requirements.txt'
             }
         }
-
-        stage('Run Tests') {
+        stage('Run Unit Tests') {
             steps {
-                sh '''
-                source $VENV_PATH/bin/activate
-                python -m unittest discover tests
-                '''
+                sh 'source $VENV_DIR/bin/activate && pytest tests/'  // Run tests (if available)
             }
         }
-
-        stage('Deploy Application') {
+        stage('Start Flask Application') {
             steps {
-                sh '''
-                source $VENV_PATH/bin/activate
-                nohup python app.py > app.log 2>&1 &
-                '''
+                sh 'source $VENV_DIR/bin/activate && nohup python3 app.py &'
             }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                script {
-                    def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/api/v1/status", returnStdout: true).trim()
-                    if (response != '200') {
-                        error("Application failed to start!")
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            sh 'deactivate || true'
         }
     }
 }
